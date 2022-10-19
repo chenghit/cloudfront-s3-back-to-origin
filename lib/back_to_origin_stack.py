@@ -23,7 +23,7 @@ class BackToOriginStack(Stack):
         super().__init__(scope, id, **kwargs)
         
         uri_list_queue = sqs.Queue(
-            self, "UriList",
+            self, "UriListQueue",
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )

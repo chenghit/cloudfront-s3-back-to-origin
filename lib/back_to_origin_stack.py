@@ -24,9 +24,9 @@ class BackToOriginStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
         
-        gcs_bucket_name = CfnParameter(self, "GcsBucketName", type="String",
-            description="The name of the Google Cloud Storage bucket.")
-
+        #gcs_bucket_name = CfnParameter(self, "GcsBucketName", type="String",
+        #    description="The name of the Google Cloud Storage bucket.")
+        gcs_bucket_name = 'my_gcp_bucket_9527'
         
         s3_bucket = s3.Bucket(
             self, "DestinationBucket",
@@ -100,7 +100,7 @@ class BackToOriginStack(Stack):
             architecture = _lambda.Architecture.ARM_64,
             layers = [lambda_layer],
             environment = {
-                'GCP_BUCKET': gcs_bucket_name.value_as_string,
+                'GCP_BUCKET': gcs_bucket_name,
                 'S3_BUCKET': s3_bucket.bucket_name,
                 'SINGLE_QUEUE_URL': single_task_queue.queue_name,
                 'MPU_QUEUE_URL': mpu_task_queue.queue_name,

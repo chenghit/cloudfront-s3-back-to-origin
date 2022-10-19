@@ -24,7 +24,7 @@ class BackToOriginPipelineStack(Stack):
                 commands=[
                     'npm install -g aws-cdk',
                     'pip install -r requirements.txt',
-                    'npx cdk synth',
+                    'cdk synth',
                 ]
             )
         )

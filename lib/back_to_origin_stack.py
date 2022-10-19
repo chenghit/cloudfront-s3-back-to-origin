@@ -155,14 +155,7 @@ class BackToOriginStack(Stack):
                 'REGION': 'read_current_region'
             }
         )
-                
-        sqs_event_source_uri_list = SqsEventSource(uri_list_queue)
-        sqs_event_source_single_tasks = SqsEventSource(single_task_queue)
-        sqs_event_source_mpu_tasks = SqsEventSource(mpu_task_queue)
-        
-        lambda_main.add_event_source(sqs_event_source_uri_list)
-        lambda_single.add_event_source(sqs_event_source_single_tasks)
-        lambda_mpu.add_event_source(sqs_event_source_mpu_tasks)
+
         
         uri_list_queue.grant_consume_messages(lambda_main)
         single_task_queue.grant_consume_messages(lambda_single)
@@ -186,6 +179,15 @@ class BackToOriginStack(Stack):
         single_table.grant_read_write_data(lambda_monitor)
         mpu_table.grant_read_write_data(lambda_monitor)
         mpu_result_table.grant_read_write_data(lambda_monitor)
+        
+        sqs_event_source_uri_list = SqsEventSource(uri_list_queue)
+        sqs_event_source_single_tasks = SqsEventSource(single_task_queue)
+        sqs_event_source_mpu_tasks = SqsEventSource(mpu_task_queue)
+        
+        lambda_main.add_event_source(sqs_event_source_uri_list)
+        lambda_single.add_event_source(sqs_event_source_single_tasks)
+        lambda_mpu.add_event_source(sqs_event_source_mpu_tasks)
+
         
         five_minutes_rule = events.Rule(
             self, 'five_minutes_rule',

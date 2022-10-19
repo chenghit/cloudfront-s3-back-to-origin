@@ -22,6 +22,26 @@ class BackToOriginStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
         
+        uri_list_queue = sqs.Queue(
+            self, "UriList",
+            retention_period=Duration.days(1),
+            visibility_timeout=Duration.minutes(5),
+        )
+        
+        single_task_queue = sqs.Queue(
+            self, "SingleTask.fifo",
+            fifo=True,
+            retention_period=Duration.days(1),
+            visibility_timeout=Duration.minutes(5),
+        )
+        
+        mpu_task_queue = sqs.Queue(
+            self, "MpuTask.fifo",
+            fifo=True,
+            retention_period=Duration.days(1),
+            visibility_timeout=Duration.minutes(5),
+        )
+        
         uri_list_table = ddb.Table(
             self, 'UriList',
             partition_key={'name': 'uri', 'type': ddb.AttributeType.STRING},

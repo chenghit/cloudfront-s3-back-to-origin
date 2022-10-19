@@ -6,7 +6,7 @@ from aws_cdk import (
 from lib.back_to_origin_stack import BackToOriginStack
 import pytest
 
-def test_dynamodb():
+def test_uri_list_table():
     pass
 
 #def test_sqs_queue_created():

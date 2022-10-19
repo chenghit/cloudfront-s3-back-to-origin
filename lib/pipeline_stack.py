@@ -22,10 +22,10 @@ class BackToOriginPipelineStack(Stack):
             assumed_by=iam.ServicePrincipal('codepipeline.amazonaws.com'),
         )
         pipeline_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name(
-                "service-role/IAMFullAccess"
+                "IAMFullAccess"
             ))
         pipeline_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name(
-                "service-role/AWSCodePipelineFullAccess"
+                "AWSCodePipelineFullAccess"
             ))
         
         pipeline = pipelines.CodePipeline(

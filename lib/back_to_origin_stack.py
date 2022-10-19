@@ -107,7 +107,7 @@ class BackToOriginStack(Stack):
                 'SINGLE_RESULT_TABLE': single_result_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
                 'DDB_TABLE': uri_list_table.table_name,
-                'REGION': Aws.Region,
+                'REGION': Aws.REGION,
             }
         )
         
@@ -123,7 +123,7 @@ class BackToOriginStack(Stack):
             environment = {
                 'SINGLE_TABLE': single_table.table_name,
                 'SINGLE_RESULT_TABLE': single_result_table.table_name,
-                'REGION': Aws.Region,
+                'REGION': Aws.REGION,
             }
         )
         
@@ -139,7 +139,7 @@ class BackToOriginStack(Stack):
             environment = {
                 'MPU_TABLE': mpu_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
-                'REGION': Aws.Region,
+                'REGION': Aws.REGION,
             }
         )
         
@@ -158,7 +158,7 @@ class BackToOriginStack(Stack):
                 'SINGLE_TABLE': single_table.table_name,
                 'MPU_TABLE': mpu_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
-                'REGION': Aws.Region,
+                'REGION': Aws.REGION,
             }
         )
 

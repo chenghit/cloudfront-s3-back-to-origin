@@ -4,7 +4,6 @@ from aws_cdk import (
     Aws, RemovalPolicy,
     aws_iam as iam,
     aws_lambda as _lambda,
-    aws_lambda_event_sources as lambda_event_source,
     aws_cloudfront as cf,
     aws_cloudfront_origins as cf_origin,
     aws_dynamodb as ddb,
@@ -12,6 +11,7 @@ from aws_cdk import (
     aws_events as event_bridge,
     aws_s3 as s3,
 )
+from aws_cdk.aws_lambda_event_sources import SqsEventSource
 
 class BackToOriginStack(Stack):
     
@@ -24,20 +24,25 @@ class BackToOriginStack(Stack):
         
         uri_list_queue = sqs.Queue(
             self, "UriListQueue",
+            queue_name='UriList',
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )
         
         single_task_queue = sqs.Queue(
-            self, "SingleTask.fifo",
+            self, "SingleTasks",
+            content_based_deduplication=True,
             fifo=True,
+            queue_name='SingleTasks.fifo',
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )
         
         mpu_task_queue = sqs.Queue(
-            self, "MpuTask.fifo",
+            self, "MpuTasks",
+            content_based_deduplication=True,
             fifo=True,
+            queue_name='MpuTasks.fifo',
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )
@@ -146,6 +151,14 @@ class BackToOriginStack(Stack):
                 'REGION': 'read_current_region'
             }
         )
+                
+        sqs_event_source_uri_list = SqsEventSource(uri_list_queue)
+        sqs_event_source_single_tasks = SqsEventSource(single_task_queue)
+        sqs_event_source_mpu_tasks = SqsEventSource(mpu_task_queue)
+        
+        lambda_main.add_event_source(sqs_event_source_uri_list)
+        lambda_single.add_event_source(sqs_event_source_single_tasks)
+        lambda_mpu.add_event_source(sqs_event_source_mpu_tasks)
         
         lambda_edge_origin_response = _lambda.Function(
             self, 'OriginResponse',

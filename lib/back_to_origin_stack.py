@@ -8,7 +8,8 @@ from aws_cdk import (
     aws_cloudfront_origins as cf_origin,
     aws_dynamodb as ddb,
     aws_sqs as sqs,
-    aws_events as event_bridge,
+    aws_events as events,
+    aws_events_targets as event_targets,
     aws_s3 as s3,
 )
 from aws_cdk.aws_lambda_event_sources import SqsEventSource
@@ -21,6 +22,8 @@ class BackToOriginStack(Stack):
 
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
+        
+        
         
         uri_list_queue = sqs.Queue(
             self, "UriListQueue",
@@ -97,6 +100,7 @@ class BackToOriginStack(Stack):
                 'MPU_QUEUE_URL': 'https://mpu.queue.url',
                 'SINGLE_RESULT_TABLE': single_result_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
+                'DDB_TABLE': uri_list_table.table_name,
                 'REGION': 'read_current_region'
             }
         )
@@ -159,6 +163,37 @@ class BackToOriginStack(Stack):
         lambda_main.add_event_source(sqs_event_source_uri_list)
         lambda_single.add_event_source(sqs_event_source_single_tasks)
         lambda_mpu.add_event_source(sqs_event_source_mpu_tasks)
+        
+        uri_list_queue.grant_consume_messages(lambda_main)
+        single_task_queue.grant_consume_messages(lambda_single)
+        mpu_task_queue.grant_consume_messages(lambda_mpu)
+        
+        single_task_queue.grant_send_messages(lambda_main)
+        single_task_queue.grant_send_messages(lambda_monitor)
+        mpu_task_queue.grant_send_messages(lambda_main)
+        mpu_task_queue.grant_send_messages(lambda_monitor)
+        
+        uri_list_table.grant_read_write_data(lambda_main)
+        single_result_table.grant_read_write_data(lambda_main)
+        mpu_result_table.grant_read_write_data(lambda_main)
+        
+        single_table.grant_read_write_data(lambda_single)
+        single_result_table.grant_read_write_data(lambda_single)
+        
+        mpu_table.grant_read_write_data(lambda_mpu)
+        mpu_result_table.grant_read_write_data(lambda_mpu)
+        
+        single_table.grant_read_write_data(lambda_monitor)
+        mpu_table.grant_read_write_data(lambda_monitor)
+        mpu_result_table.grant_read_write_data(lambda_monitor)
+        
+        five_minutes_rule = events.Rule(
+            self, 'five_minutes_rule',
+            schedule=events.Schedule.rate(Duration.minutes(5)),
+        )
+        
+        five_minutes_rule.add_target(event_targets.LambdaFunction(lambda_monitor))
+
         
         lambda_edge_origin_response = _lambda.Function(
             self, 'OriginResponse',

@@ -1,6 +1,7 @@
 from constructs import Construct
 from aws_cdk import (
     Stack,
+    aws_iam as iam,
     aws_codecommit as codecommit,
     pipelines as pipelines,
 )
@@ -28,6 +29,12 @@ class BackToOriginPipelineStack(Stack):
                 ]
             )
         )
+        
+        pipeline.add_to_resource_policy(iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=['iam:*'],
+            resources=['*'],
+            ))
         
         deploy = BackToOriginPipelineStage(self, 'Deploy')
         deploy_stage = pipeline.add_stage(deploy)

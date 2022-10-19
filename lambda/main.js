@@ -14,7 +14,7 @@ const logger = createLogger({
 
 const md5 = require("md5");
 const AWS = require('aws-sdk');
-AWS.config.region = 'ap-southeast-1';
+AWS.config.region = process.env.REGION;
 const ddb = new AWS.DynamoDB.DocumentClient({apiVersion:'2012-08-10'});
 const sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 const s3 = new AWS.S3({apiVersion: '2006-03-01'});

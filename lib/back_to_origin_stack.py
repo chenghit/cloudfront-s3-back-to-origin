@@ -23,11 +23,14 @@ class BackToOriginStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
         
-        
+        s3_bucket = s3.Bucket(
+            self, "DestinationBucket",
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            website_index_document='index.html',
+        )
         
         uri_list_queue = sqs.Queue(
             self, "UriListQueue",
-            queue_name='UriList',
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )
@@ -36,7 +39,6 @@ class BackToOriginStack(Stack):
             self, "SingleTasks",
             content_based_deduplication=True,
             fifo=True,
-            queue_name='SingleTasks.fifo',
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )
@@ -45,7 +47,6 @@ class BackToOriginStack(Stack):
             self, "MpuTasks",
             content_based_deduplication=True,
             fifo=True,
-            queue_name='MpuTasks.fifo',
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )
@@ -95,9 +96,9 @@ class BackToOriginStack(Stack):
             layers = [lambda_layer],
             environment = {
                 'GCP_BUCKET': 'input_your_gcp_bucket_name',
-                'S3_BUCKET': 's3://destination.s3.bucket.name',
-                'SINGLE_QUEUE_URL': 'https://single.queue.url',
-                'MPU_QUEUE_URL': 'https://mpu.queue.url',
+                'S3_BUCKET': s3_bucket.bucket_name,
+                'SINGLE_QUEUE_URL': single_task_queue.queue_name,
+                'MPU_QUEUE_URL': mpu_task_queue.queue_name,
                 'SINGLE_RESULT_TABLE': single_result_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
                 'DDB_TABLE': uri_list_table.table_name,
@@ -147,8 +148,8 @@ class BackToOriginStack(Stack):
             architecture = _lambda.Architecture.ARM_64,
             layers = [lambda_layer],
             environment = {
-                'SINGLE_QUEUE_URL': 'https://single.queue.url',
-                'MPU_QUEUE_URL': 'https://mpu.queue.url',
+                'SINGLE_QUEUE_URL': single_task_queue.queue_name,
+                'MPU_QUEUE_URL': mpu_task_queue.queue_name,
                 'SINGLE_TABLE': single_table.table_name,
                 'MPU_TABLE': mpu_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
@@ -180,9 +181,18 @@ class BackToOriginStack(Stack):
         mpu_table.grant_read_write_data(lambda_monitor)
         mpu_result_table.grant_read_write_data(lambda_monitor)
         
+        s3_bucket.grant_read_write(lambda_single)
+        s3_bucket.grant_read_write(lambda_mpu)
+        
         sqs_event_source_uri_list = SqsEventSource(uri_list_queue)
-        sqs_event_source_single_tasks = SqsEventSource(single_task_queue)
-        sqs_event_source_mpu_tasks = SqsEventSource(mpu_task_queue)
+        sqs_event_source_single_tasks = SqsEventSource(
+            single_task_queue,
+            batch_size=1,
+        )
+        sqs_event_source_mpu_tasks = SqsEventSource(
+            mpu_task_queue,
+            batch_size=1,
+        )
         
         lambda_main.add_event_source(sqs_event_source_uri_list)
         lambda_single.add_event_source(sqs_event_source_single_tasks)

@@ -17,6 +17,17 @@ class BackToOriginPipelineStack(Stack):
             repository_name='BackToOriginPipeRepo'
         )
         
+        pipeline_role = iam.Role(
+            self, 'CodePipelineRole',
+            assumed_by=iam.ServicePrincipal('codepipeline.amazonaws.com'),
+        )
+        pipeline_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name(
+                "service-role/IAMFullAccess"
+            ))
+        pipeline_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name(
+                "service-role/AWSCodePipelineFullAccess"
+            ))
+        
         pipeline = pipelines.CodePipeline(
             self, 'Pipeline',
             synth=pipelines.ShellStep(
@@ -27,14 +38,9 @@ class BackToOriginPipelineStack(Stack):
                     'pip install -r requirements.txt',
                     'cdk synth',
                 ]
-            )
+            ),
+            role=pipeline_role,
         )
-        
-        pipeline.add_to_resource_policy(iam.PolicyStatement(
-            effect=iam.Effect.ALLOW,
-            actions=['iam:*'],
-            resources=['*'],
-            ))
         
         deploy = BackToOriginPipelineStage(self, 'Deploy')
         deploy_stage = pipeline.add_stage(deploy)

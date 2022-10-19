@@ -13,7 +13,7 @@ from aws_cdk import (
     aws_s3 as s3,
 )
 
-class BackToOrigin(Stack):
+class BackToOriginStack(Stack):
     
     @property
     def handler(self):

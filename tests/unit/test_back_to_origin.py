@@ -3,7 +3,7 @@ from aws_cdk import (
         aws_lambda as _lambda,
         assertions
     )
-from lib.back_to_origin_stack import BackToOrigin
+from lib.back_to_origin_stack import BackToOriginStack
 import pytest
 
 def test_dynamodb():

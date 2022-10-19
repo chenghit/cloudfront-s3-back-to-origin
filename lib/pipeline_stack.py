@@ -4,6 +4,7 @@ from aws_cdk import (
     aws_codecommit as codecommit,
     pipelines as pipelines,
 )
+from .pipeline_stage import BackToOriginPipelineStage
 
 class BackToOriginPipelineStack(Stack):
     
@@ -23,7 +24,10 @@ class BackToOriginPipelineStack(Stack):
                 commands=[
                     'npm install -g aws-cdk',
                     'pip install -r requirements.txt',
-                    'cdk synth',
+                    'npx cdk synth',
                 ]
             )
         )
+        
+        deploy = BackToOriginPipelineStage(self, 'Deploy')
+        deploy_stage = pipeline.add_stage(deploy)

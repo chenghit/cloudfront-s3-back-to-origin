@@ -35,7 +35,6 @@ class BackToOriginStack(Stack):
             self, "DestinationBucket",
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY,
-            auto_delete_objects=True,
         )
         
         uri_list_queue = sqs.Queue(
@@ -224,12 +223,12 @@ class BackToOriginStack(Stack):
             code = _lambda.Code.from_asset('lambda_edge'),
             handler = 'origin_response.handler',
         )
-
+        '''
         cf_origin_request_policy = cf.OriginRequestPolicy(
             self, 'OriginRequestPolicy',
             comment='Provide environment variables to Lambda@Edge via custom headers',
             header_behavior=cf.OriginRequestHeaderBehavior.allow_list('x-back-to-origin'),
-        )
+        )'''
         
         cf_distribution = cf.Distribution(
             self, 'cf_distribution',
@@ -252,7 +251,7 @@ class BackToOriginStack(Stack):
                     ),
                     fallback_status_codes=[403, 404]
                 ),
-                origin_request_policy=cf_origin_request_policy,
+                #origin_request_policy=cf_origin_request_policy,
                 edge_lambdas=[
                     cf.EdgeLambda(
                         event_type=cf.LambdaEdgeEventType.ORIGIN_REQUEST,

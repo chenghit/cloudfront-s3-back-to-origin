@@ -19,14 +19,13 @@ allowed_region = [
     'sa-east-1',   
 ]
 
-if cdk.Aws.REGION in allowed_region:
-
-    app = cdk.App()
-    #BackToOriginStack(app, "back-to-origin")
-    BackToOriginPipelineStack(app, 'BackToOriginPipelineStack')
-    
-    app.synth()
-
-else:
+if not (cdk.Aws.REGION in allowed_region):
     
     print('This solution can only be deployed in following regions:', allowed_region)
+    return
+
+app = cdk.App()
+#BackToOriginStack(app, "back-to-origin")
+BackToOriginPipelineStack(app, 'BackToOriginPipelineStack')
+    
+app.synth()

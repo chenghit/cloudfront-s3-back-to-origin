@@ -1,3 +1,4 @@
+import json
 from constructs import Construct
 from aws_cdk import (
     Duration, Stack,
@@ -6,7 +7,7 @@ from aws_cdk import (
     aws_iam as iam,
     aws_lambda as _lambda,
     aws_cloudfront as cf,
-    aws_cloudfront_origins as cf_origin,
+    aws_cloudfront_origins as origins,
     aws_dynamodb as ddb,
     aws_sqs as sqs,
     aws_events as events,
@@ -26,12 +27,15 @@ class BackToOriginStack(Stack):
         
         #gcs_bucket_name = CfnParameter(self, "GcsBucketName", type="String",
         #    description="The name of the Google Cloud Storage bucket.")
+        gcs_domain_name = 'storage.googleapis.com'
         gcs_bucket_name = 'my_gcp_bucket_9527'
+        solution_region = Aws.REGION
         
         s3_bucket = s3.Bucket(
             self, "DestinationBucket",
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
-            website_index_document='index.html',
+            removal_policy=RemovalPolicy.DESTROY,
+            auto_delete_objects=True,
         )
         
         uri_list_queue = sqs.Queue(
@@ -107,7 +111,7 @@ class BackToOriginStack(Stack):
                 'SINGLE_RESULT_TABLE': single_result_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
                 'DDB_TABLE': uri_list_table.table_name,
-                'REGION': Aws.REGION,
+                'REGION': solution_region,
             }
         )
         
@@ -123,7 +127,7 @@ class BackToOriginStack(Stack):
             environment = {
                 'SINGLE_TABLE': single_table.table_name,
                 'SINGLE_RESULT_TABLE': single_result_table.table_name,
-                'REGION': Aws.REGION,
+                'REGION': solution_region,
             }
         )
         
@@ -139,7 +143,7 @@ class BackToOriginStack(Stack):
             environment = {
                 'MPU_TABLE': mpu_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
-                'REGION': Aws.REGION,
+                'REGION': solution_region,
             }
         )
         
@@ -158,7 +162,7 @@ class BackToOriginStack(Stack):
                 'SINGLE_TABLE': single_table.table_name,
                 'MPU_TABLE': mpu_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
-                'REGION': Aws.REGION,
+                'REGION': solution_region,
             }
         )
 
@@ -211,7 +215,7 @@ class BackToOriginStack(Stack):
         
         five_minutes_rule.add_target(event_targets.LambdaFunction(lambda_monitor))
 
-        
+
         lambda_edge_origin_response = _lambda.Function(
             self, 'OriginResponse',
             runtime = _lambda.Runtime.NODEJS_16_X,
@@ -220,5 +224,44 @@ class BackToOriginStack(Stack):
             code = _lambda.Code.from_asset('lambda_edge'),
             handler = 'origin_response.handler',
         )
+
+        cf_origin_request_policy = cf.OriginRequestPolicy(
+            self, 'OriginRequestPolicy',
+            comment='Provide environment variables to Lambda@Edge via custom headers',
+            header_behavior=cf.OriginRequestHeaderBehavior.allow_list('x-back-to-origin'),
+        )
+        
+        cf_distribution = cf.Distribution(
+            self, 'cf_distribution',
+            default_behavior=cf.BehaviorOptions(
+                origin=origins.OriginGroup(
+                    primary_origin=origins.S3Origin(
+                        s3_bucket,
+                        origin_shield_region=solution_region,
+                    ),
+                    fallback_origin=origins.HttpOrigin(
+                        gcs_domain_name,
+                        origin_path='/'+gcs_bucket_name,
+                        custom_headers={
+                            'x-back-to-origin': json.dumps({
+                                'region': solution_region,
+                                'queue_url': uri_list_queue.queue_url
+                            })
+                        },
+                        origin_shield_region=solution_region,
+                    ),
+                    fallback_status_codes=[403, 404]
+                ),
+                origin_request_policy=cf_origin_request_policy,
+                edge_lambdas=[
+                    cf.EdgeLambda(
+                        event_type=cf.LambdaEdgeEventType.ORIGIN_REQUEST,
+                        function_version=lambda_edge_origin_response.current_version,
+                    )
+                ]
+            )
+        )
+        
+
         
         

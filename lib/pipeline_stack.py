@@ -24,9 +24,9 @@ class BackToOriginPipelineStack(Stack):
         pipeline_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name(
                 "IAMFullAccess"
             ))
-        pipeline_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name(
-                "AWSCodePipelineFullAccess"
-            ))
+        #pipeline_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name(
+        #        "AWSCodePipelineFullAccess"
+        #    ))
         
         pipeline = pipelines.CodePipeline(
             self, 'Pipeline',

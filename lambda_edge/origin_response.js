@@ -1,11 +1,6 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const sqs = new AWS.SQS({
-    region: 'ap-southeast-1',
-    apiVersion: '2012-11-05'
-});
-const queueUrl = 'https://sqs.ap-southeast-1.amazonaws.com/310581850192/request_uri_queue';
 
 exports.handler = async (event, context) => {
     
@@ -19,6 +14,16 @@ exports.handler = async (event, context) => {
 
     // Follow Secondary Origin 200, 206, or 
     if (serverHeader === 'UploadServer') {
+        
+        const myHeader = request.headers['x-back-to-origin'][0].value;
+        const myVariables = JSON.parse(myHeader);
+        
+        const sqs = new AWS.SQS({
+            region: myVariables.region,
+            apiVersion: '2012-11-05'
+        });
+        const queueUrl = myVariables.queue_url;
+
         
         let contentLength = '0';
         let contentType = 'none';

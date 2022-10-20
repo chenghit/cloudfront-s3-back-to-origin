@@ -227,28 +227,7 @@ class BackToOriginStack(Stack):
         )
         
         uri_list_queue.grant_send_messages(lambda_edge_origin_response)
-        
-        cf_cache_policy = cf.CfnCachePolicy(self, 'BackToOriginCachePolicy',
-            cache_policy_config=cf.CfnCachePolicy.CachePolicyConfigProperty(
-                default_ttl=30,
-                max_ttl=60,
-                min_ttl=0,
-                name='BackToOriginCachePolicy',
-                parameters_in_cache_key_and_forwarded_to_origin=cf.CfnCachePolicy.ParametersInCacheKeyAndForwardedToOriginProperty(
-                    cookies_config=cf.CfnCachePolicy.CookiesConfigProperty(
-                        cookie_behavior='none',
-                    ),
-                    enable_accept_encoding_gzip=True,
-                    headers_config=cf.CfnCachePolicy.HeadersConfigProperty(
-                        header_behavior='none',
-                    ),
-                    query_strings_config=cf.CfnCachePolicy.QueryStringsConfigProperty(
-                        query_string_behavior='none',
-                    ),
-                )
-            )
-        )
-        
+
         cf_distribution = cf.Distribution(
             self, 'cf_distribution',
             default_behavior=cf.BehaviorOptions(
@@ -272,7 +251,14 @@ class BackToOriginStack(Stack):
                     ),
                     fallback_status_codes=[403, 404]
                 ),
-                cache_policy=cf_cache_policy,
+                cache_policy=cf.CachePolicy(self, 'BackToOriginCachePolicy',
+                    cache_policy_name='BackToOriginCachePolicy',
+                    default_ttl=Duration.seconds(30),
+                    max_ttl=Duration.seconds(60),
+                    min_ttl=Duration.seconds(0),
+                    enable_accept_encoding_brotli=True,
+                    enable_accept_encoding_gzip=True,
+                ),
                 edge_lambdas=[
                     cf.EdgeLambda(
                         event_type=cf.LambdaEdgeEventType.ORIGIN_RESPONSE,

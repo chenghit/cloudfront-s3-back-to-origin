@@ -233,7 +233,19 @@ class BackToOriginStack(Stack):
                 default_ttl=30,
                 max_ttl=60,
                 min_ttl=0,
-                name='BackToOriginCachePolicy'
+                name='BackToOriginCachePolicy',
+                parameters_in_cache_key_and_forwarded_to_origin=cf.CfnCachePolicy.ParametersInCacheKeyAndForwardedToOriginProperty(
+                    cookies_config=cf.CfnCachePolicy.CookiesConfigProperty(
+                        cookie_behavior="cookieBehavior",
+                    ),
+                    enable_accept_encoding_gzip=True,
+                    headers_config=cf.CfnCachePolicy.HeadersConfigProperty(
+                        header_behavior="headerBehavior",
+                    ),
+                    query_strings_config=cf.CfnCachePolicy.QueryStringsConfigProperty(
+                        query_string_behavior="queryStringBehavior",
+                    ),
+                )
             )
         )
         

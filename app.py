@@ -6,6 +6,25 @@ from lib.pipeline_stack import BackToOriginPipelineStack
 
 app = cdk.App()
 #BackToOriginStack(app, "back-to-origin")
-BackToOriginPipelineStack(app, 'BackToOriginPipelineStack')
+
+'''
+This solution will enable Origin Shield. Please make sure deploy it in one of
+the following regions:
+    us-east-1
+    us-east-2
+    us-west-2
+    ap-south-1
+    ap-northeast-2
+    ap-southeast-1
+    ap-southeast-2
+    ap-northeast-1
+    eu-central-1
+    eu-west-1
+    eu-west-2
+    sa-east-1
+'''
+BackToOriginPipelineStack(app, 'BackToOriginPipelineStack',
+    env=cdk.Environment(region="us-east-2")
+)
     
 app.synth()

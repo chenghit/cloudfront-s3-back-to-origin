@@ -40,5 +40,5 @@ class BackToOriginPipelineStack(Stack):
         )
         
         deploy = BackToOriginPipelineStage(self, 'Deploy',
-            env=Environment(region="eu-west-1"))
+            env=Environment(region="us-east-1"))
         deploy_stage = pipeline.add_stage(deploy)

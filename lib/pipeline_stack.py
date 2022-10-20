@@ -1,6 +1,6 @@
 from constructs import Construct
 from aws_cdk import (
-    Stack,
+    Stack, Environment,
     aws_iam as iam,
     aws_codecommit as codecommit,
     pipelines as pipelines,
@@ -39,5 +39,6 @@ class BackToOriginPipelineStack(Stack):
             role=pipeline_role,
         )
         
-        deploy = BackToOriginPipelineStage(self, 'Deploy')
+        deploy = BackToOriginPipelineStage(self, 'Deploy',
+            env=Environment(region="eu-west-1"))
         deploy_stage = pipeline.add_stage(deploy)

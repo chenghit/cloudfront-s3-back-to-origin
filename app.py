@@ -23,8 +23,6 @@ the following regions:
     eu-west-2
     sa-east-1
 '''
-BackToOriginPipelineStack(app, 'BackToOriginPipelineStack',
-    env=cdk.Environment(region="us-east-2")
-)
+BackToOriginPipelineStack(app, 'BackToOriginPipelineStack')
     
 app.synth()

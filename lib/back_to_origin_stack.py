@@ -228,16 +228,27 @@ class BackToOriginStack(Stack):
         
         uri_list_queue.grant_send_messages(lambda_edge_origin_response)
         
+        cf_cache_policy = cf.CfnCachePolicy(self, 'BackToOriginCachePolicy',
+            cache_policy_config=cf.CfnCachePolicy.CachePolicyConfigProperty(
+                default_ttl=30,
+                max_ttl=60,
+                min_ttl=0,
+                name='BackToOriginCachePolicy'
+            )
+        )
+        
         cf_distribution = cf.Distribution(
             self, 'cf_distribution',
             default_behavior=cf.BehaviorOptions(
                 origin=origins.OriginGroup(
                     primary_origin=origins.S3Origin(
                         s3_bucket,
+                        origin_id='S3 Origin',
                         origin_shield_region=solution_region,
                     ),
                     fallback_origin=origins.HttpOrigin(
                         gcs_domain_name,
+                        origin_id='GCS Origin',
                         origin_path='/'+gcs_bucket_name,
                         custom_headers={
                             'x-back-to-origin': json.dumps({
@@ -249,6 +260,7 @@ class BackToOriginStack(Stack):
                     ),
                     fallback_status_codes=[403, 404]
                 ),
+                cache_policy=cf_cache_policy,
                 edge_lambdas=[
                     cf.EdgeLambda(
                         event_type=cf.LambdaEdgeEventType.ORIGIN_REQUEST,

@@ -237,13 +237,16 @@ class BackToOriginStack(Stack):
                 parameters_in_cache_key_and_forwarded_to_origin=cf.CfnCachePolicy.ParametersInCacheKeyAndForwardedToOriginProperty(
                     cookies_config=cf.CfnCachePolicy.CookiesConfigProperty(
                         cookie_behavior="cookieBehavior",
+                        cookies=None,
                     ),
                     enable_accept_encoding_gzip=True,
                     headers_config=cf.CfnCachePolicy.HeadersConfigProperty(
                         header_behavior="headerBehavior",
+                        headers=None,
                     ),
                     query_strings_config=cf.CfnCachePolicy.QueryStringsConfigProperty(
                         query_string_behavior="queryStringBehavior",
+                        query_strings=None,
                     ),
                 )
             )

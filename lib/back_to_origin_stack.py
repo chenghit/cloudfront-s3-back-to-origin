@@ -236,17 +236,14 @@ class BackToOriginStack(Stack):
                 name='BackToOriginCachePolicy',
                 parameters_in_cache_key_and_forwarded_to_origin=cf.CfnCachePolicy.ParametersInCacheKeyAndForwardedToOriginProperty(
                     cookies_config=cf.CfnCachePolicy.CookiesConfigProperty(
-                        cookie_behavior="cookieBehavior",
-                        cookies=None,
+                        cookie_behavior=None,
                     ),
                     enable_accept_encoding_gzip=True,
                     headers_config=cf.CfnCachePolicy.HeadersConfigProperty(
-                        header_behavior="headerBehavior",
-                        headers=None,
+                        header_behavior=None,
                     ),
                     query_strings_config=cf.CfnCachePolicy.QueryStringsConfigProperty(
-                        query_string_behavior="queryStringBehavior",
-                        query_strings=None,
+                        query_string_behavior=None,
                     ),
                 )
             )
@@ -278,7 +275,7 @@ class BackToOriginStack(Stack):
                 cache_policy=cf_cache_policy,
                 edge_lambdas=[
                     cf.EdgeLambda(
-                        event_type=cf.LambdaEdgeEventType.ORIGIN_REQUEST,
+                        event_type=cf.LambdaEdgeEventType.ORIGIN_RESPONSE,
                         function_version=lambda_edge_origin_response.current_version,
                     )
                 ]

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import aws_cdk as cdk
 #from lib.back_to_origin_stack import BackToOriginStack
 from lib.pipeline_stack import BackToOriginPipelineStack
@@ -18,11 +19,11 @@ allowed_region = [
     'eu-west-2',
     'sa-east-1',   
 ]
+current_region = cdk.Aws.REGION
 
-if not (cdk.Aws.REGION in allowed_region):
+if not (current_region in allowed_region):
     
-    print('This solution can only be deployed in following regions:', allowed_region)
-    return
+    sys.exit('You cannot deploy the solution in {} region.'.format(current_region))
 
 app = cdk.App()
 #BackToOriginStack(app, "back-to-origin")

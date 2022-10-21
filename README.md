@@ -5,7 +5,7 @@
 
 Clients <---> CloudFront <---> S3
 
-If an object clients request is not present in S3 bucket, this solution will
+If an object requested by clients is not present in S3 bucket, this solution will
 fetch the object from the original Origin (the original storage).
 
 ## Solution architecture

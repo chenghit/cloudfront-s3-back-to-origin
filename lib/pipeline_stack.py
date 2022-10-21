@@ -14,7 +14,7 @@ class BackToOriginPipelineStack(Stack):
         
         repo = codecommit.Repository(
             self, 'BackToOriginRepo',
-            repository_name='BackToOriginPipeRepo'
+            repository_name='BackToOriginPipeRepo',
         )
         
         pipeline_role = iam.Role(

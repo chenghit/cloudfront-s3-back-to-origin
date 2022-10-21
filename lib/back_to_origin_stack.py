@@ -107,8 +107,8 @@ class BackToOriginStack(Stack):
             environment = {
                 'GCP_BUCKET': gcs_bucket_name,
                 'S3_BUCKET': s3_bucket.bucket_name,
-                'SINGLE_QUEUE_URL': single_task_queue.queue_name,
-                'MPU_QUEUE_URL': mpu_task_queue.queue_name,
+                'SINGLE_QUEUE_URL': single_task_queue.queue_url,
+                'MPU_QUEUE_URL': mpu_task_queue.queue_url,
                 'SINGLE_RESULT_TABLE': single_result_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
                 'DDB_TABLE': uri_list_table.table_name,
@@ -158,8 +158,8 @@ class BackToOriginStack(Stack):
             architecture = _lambda.Architecture.ARM_64,
             layers = [lambda_layer],
             environment = {
-                'SINGLE_QUEUE_URL': single_task_queue.queue_name,
-                'MPU_QUEUE_URL': mpu_task_queue.queue_name,
+                'SINGLE_QUEUE_URL': single_task_queue.queue_url,
+                'MPU_QUEUE_URL': mpu_task_queue.queue_url,
                 'SINGLE_TABLE': single_table.table_name,
                 'MPU_TABLE': mpu_table.table_name,
                 'MPU_RESULT_TABLE': mpu_result_table.table_name,
@@ -230,16 +230,18 @@ class BackToOriginStack(Stack):
 
         cf_distribution = cf.Distribution(
             self, 'cf_distribution',
+            comment='Back-to-Origin Demo',
+            default_root_object='index.html',
             default_behavior=cf.BehaviorOptions(
                 origin=origins.OriginGroup(
                     primary_origin=origins.S3Origin(
                         s3_bucket,
-                        #origin_id='S3_Origin',
+                        origin_id='S3Origin',
                         origin_shield_region=solution_region,
                     ),
                     fallback_origin=origins.HttpOrigin(
                         gcs_domain_name,
-                        #origin_id='GCS_Origin',
+                        origin_id='GcsOrigin',
                         origin_path='/'+gcs_bucket_name,
                         custom_headers={
                             'x-back-to-origin': json.dumps({

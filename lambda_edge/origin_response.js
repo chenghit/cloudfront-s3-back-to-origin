@@ -15,7 +15,7 @@ exports.handler = async (event, context) => {
     // Follow Secondary Origin 200, 206, or 
     if (serverHeader === 'UploadServer') {
         
-        const myHeader = request.headers['x-back-to-origin'][0].value;
+        const myHeader = request.origin.custom.customHeaders['x-back-to-origin'][0].value;
         const myVariables = JSON.parse(myHeader);
         
         const sqs = new AWS.SQS({

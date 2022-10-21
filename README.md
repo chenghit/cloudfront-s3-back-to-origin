@@ -70,8 +70,8 @@ different from other resources, CDK will create two stacks automatically to depl
 L@E and other resources separately. As a result, you must explicitly determine
 which region you are going to deploy the other resources into.
 
-This solution will enable Origin Shield. Please make sure deploy it in one of
-the following regions and as close to the original Origin as possible.
+This solution will enable **Origin Shield**. Please make sure deploying it in one 
+of the following regions and as close to the original Origin as possible.
 
 ```
 us-east-1

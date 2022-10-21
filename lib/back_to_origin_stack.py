@@ -236,12 +236,10 @@ class BackToOriginStack(Stack):
                 origin=origins.OriginGroup(
                     primary_origin=origins.S3Origin(
                         s3_bucket,
-                        origin_id='S3Origin',
                         origin_shield_region=solution_region,
                     ),
                     fallback_origin=origins.HttpOrigin(
                         gcs_domain_name,
-                        origin_id='GcsOrigin',
                         origin_path='/'+gcs_bucket_name,
                         custom_headers={
                             'x-back-to-origin': json.dumps({

@@ -4,7 +4,7 @@ from constructs import Construct
 from aws_cdk import (
     Duration, Stack,
     Aws, RemovalPolicy,
-    CfnParameter,
+    CfnParameter, PhysicalName,
     aws_iam as iam,
     aws_lambda as _lambda,
     aws_cloudfront as cf,
@@ -26,27 +26,30 @@ class BackToOriginStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
         
-        #gcs_bucket_name = CfnParameter(self, "GcsBucketName", type="String",
-        #    description="The name of the Google Cloud Storage bucket.")
+        gcs_bucket_name = CfnParameter(self, 'gcsBucketName', type='String',
+            description='The name of the Google Cloud Storage bucket.')
         
         gcs_domain_name = 'storage.googleapis.com'
-        gcs_bucket_name = 'my_gcp_bucket_9527'
+        #gcs_bucket_name = 'my_gcp_bucket_9527'
         solution_region = Aws.REGION
         
         s3_bucket = s3.Bucket(
             self, "DestinationBucket",
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY,
+            auto_delete_objects=True,
         )
         
         uri_list_queue = sqs.Queue(
             self, "UriListQueue",
+            queue_name=PhysicalName.GENERATE_IF_NEEDED,
             retention_period=Duration.days(1),
             visibility_timeout=Duration.minutes(5),
         )
         
         single_task_queue = sqs.Queue(
             self, "SingleTasks",
+            #queue_name=PhysicalName.GENERATE_IF_NEEDED,
             content_based_deduplication=True,
             fifo=True,
             retention_period=Duration.days(1),
@@ -55,6 +58,7 @@ class BackToOriginStack(Stack):
         
         mpu_task_queue = sqs.Queue(
             self, "MpuTasks",
+            #queue_name=PhysicalName.GENERATE_IF_NEEDED,
             content_based_deduplication=True,
             fifo=True,
             retention_period=Duration.days(1),
@@ -105,7 +109,7 @@ class BackToOriginStack(Stack):
             architecture = _lambda.Architecture.ARM_64,
             layers = [lambda_layer],
             environment = {
-                'GCP_BUCKET': gcs_bucket_name,
+                'GCP_BUCKET': gcs_bucket_name.value_as_string,
                 'S3_BUCKET': s3_bucket.bucket_name,
                 'SINGLE_QUEUE_URL': single_task_queue.queue_url,
                 'MPU_QUEUE_URL': mpu_task_queue.queue_url,
@@ -191,6 +195,7 @@ class BackToOriginStack(Stack):
         mpu_table.grant_read_write_data(lambda_monitor)
         mpu_result_table.grant_read_write_data(lambda_monitor)
         
+        s3_bucket.grant_read_write(lambda_main)
         s3_bucket.grant_read_write(lambda_single)
         s3_bucket.grant_read_write(lambda_mpu)
         
@@ -240,7 +245,7 @@ class BackToOriginStack(Stack):
                     ),
                     fallback_origin=origins.HttpOrigin(
                         gcs_domain_name,
-                        origin_path='/'+gcs_bucket_name,
+                        origin_path='/'+gcs_bucket_name.value_as_string,
                         custom_headers={
                             'x-back-to-origin': json.dumps({
                                 'region': solution_region,

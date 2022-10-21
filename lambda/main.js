@@ -235,6 +235,7 @@ async function sendSqsMsg (queueUrl, msg, groupId, dupId) {
         logger.info(`SendMessage Success : ${msg}`);
     } catch (err) {
         logger.error(`SendMessage Error : ${msg}`);
+        logger.error(err);
         return;
     }
 }

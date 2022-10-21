@@ -11,3 +11,5 @@ __pycache__
 cdk.out
 tests
 test.py
+back_to_origin_stack.1.py
+pipeline_*.py

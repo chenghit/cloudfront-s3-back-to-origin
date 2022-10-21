@@ -5,7 +5,8 @@ import aws_cdk as cdk
 from lib.pipeline_stack import BackToOriginPipelineStack
 
 app = cdk.App()
-#BackToOriginStack(app, "back-to-origin")
+#BackToOriginStack(app, "back-to-origin",
+#    env=cdk.Environment(region="us-east-1"))
 
 '''
 This solution will enable Origin Shield. Please make sure deploy it in one of

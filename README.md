@@ -14,6 +14,8 @@ fetch the object from the original Origin (the original storage).
 
 ## Backend data tranfer architecture
 
+Part of the code comes from [分布式 Lambda 从海外到中国自动同步S3文件](https://aws.amazon.com/cn/blogs/china/lambda-overseas-china-s3-file/)
+
 ![Backend data tranfer architecture](/img/backend_data_transfer_architecture.png)
 
 ## Deployment
@@ -116,6 +118,12 @@ $ cdk deploy --all --parameters BackToOrigin:gcsBucketName=YOUR_GCS_BUCKET_NAME
 To add additional dependencies, for example other CDK libraries, just add
 them to your `setup.py` file and rerun the `pip install -r requirements.txt`
 command.
+
+## Expected test results
+
+![Before the test](/img/before_the_test.png)
+
+![After the test](/img/after_the_test.png)
 
 ## Removement
 

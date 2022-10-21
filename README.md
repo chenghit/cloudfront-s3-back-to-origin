@@ -1,7 +1,24 @@
 
-# Welcome to your CDK Python project!
+# Welcome CloudFront-S3 Back To Origin project!
 
-This is a blank project for CDK development with Python.
+## Requirement
+
+Clients <---> CloudFront <---> S3
+
+If an object clients request is not present in S3 bucket, this solution will
+fetch the object from the original Origin (the original storage).
+
+## Solution architecture
+
+![Solution architecture](/img/solution_architecture.png)
+
+## Backend data tranfer architecture
+
+![Backend data tranfer architecture](/img/backend_data_transfer_architecture.png)
+
+## Deployment
+
+This is a project demo for CDK development with Python.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
@@ -34,28 +51,77 @@ If you are a Windows platform, you would activate the virtualenv like this:
 Once the virtualenv is activated, you can install the required dependencies.
 
 ```
-$ npm install -g aws-cdk
-$ cdk --version
-2.47.0 (build 3528e3d)
 $ pip install -r requirements.txt
+```
+
+This project was built using CDK version 2.46. Please make sure the AWS CDK CLI
+version in your local environment is 2.46 or later. If it is not, upgrade it to
+latest version.
+
+```
+$ npm uninstall -g aws-cdk
+$ npm install -g aws-cdk
+```
+
+Since Lambda@Edge function must be deployed to `us-east-1` region and may be 
+different from other resources, CDK will create two stacks automatically to deploy
+L@E and other resources separately. As a result, you must explicitly determine
+which region you are going to deploy the other resources into.
+
+This solution will enable Origin Shield. Please make sure deploy it in one of
+the following regions and as close to the original Origin as possible.
+
+```
+us-east-1
+us-east-2
+us-west-2
+ap-south-1
+ap-northeast-2
+ap-southeast-1
+ap-southeast-2
+ap-northeast-1
+eu-central-1
+eu-west-1
+eu-west-2
+sa-east-1
+```
+
+Then bootstrap the CDK project with your Account ID and region code.
+
+```
+$ cdk bootstrap ACCOUNT_ID/REGION
 ```
 
 At this point you can now synthesize the CloudFormation template for this code.
 
 ```
-$ cdk bootstrap 636696231660/ap-southeast-1
 $ cdk synth
-$ cdk deploy
+```
 
-Since this app includes more than a single stack, specify which stacks to use (wildcards are supported) or specify `--all`
-Stacks: edge-lambda-stack-c8364b560aac02a72c6241ee2b260dbcc0b27714d6 · BackToOrigin
+As I mentioned earlier, CDK will create two stacks automatically. One is named
+`BackToOrigin`, and the other one is named `edge-lambda-stack-xxxxxx`. You can
+deploy them one by one, or deploy them all together using `--all` following 
+`cdk deploy` command.
 
-$ cdk deploy --all --parameters BackToOrigin:gcsBucketName=my_gcp_bucket_9527
+Also, you need to prepare a Google Cloud Storage (GCS) bucket as the original
+Origin. GCS provides 3-month free trial without object-level ACLs enabled. So my
+GCS bucket is public to internet and my code does not include GCS API authentication
+logic. If your GCS bucket needs the authentication, add the necessary code after
+the deployment, please.
+
+```
+$ cdk deploy --all --parameters BackToOrigin:gcsBucketName=YOUR_GCS_BUCKET_NAME
 ```
 
 To add additional dependencies, for example other CDK libraries, just add
 them to your `setup.py` file and rerun the `pip install -r requirements.txt`
 command.
+
+## Removement
+
+```
+$ cdk destroy --all
+```
 
 ## Useful commands
 
@@ -66,9 +132,3 @@ command.
  * `cdk docs`        open CDK documentation
 
 Enjoy!
-
-
-```
-$ cdk destroy --all
-Are you sure you want to delete: BackToOrigin, edge-lambda-stack-c8364b560aac02a72c6241ee2b260dbcc0b27714d6 (y/n)? 
-```

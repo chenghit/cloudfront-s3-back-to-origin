@@ -3,7 +3,6 @@
 import os
 import aws_cdk as cdk
 from lib.back_to_origin_stack import BackToOriginStack
-#from lib.pipeline_stack import BackToOriginPipelineStack
 
 app = cdk.App()
 BackToOriginStack(
@@ -29,7 +28,5 @@ the following regions:
     eu-west-2
     sa-east-1
 '''
-#BackToOriginPipelineStack(app, 'BackToOriginPipelineStack',
-#    env=cdk.Environment(region="us-east-1"))
     
 app.synth()

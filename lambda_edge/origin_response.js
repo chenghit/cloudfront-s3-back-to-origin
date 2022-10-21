@@ -12,7 +12,7 @@ exports.handler = async (event, context) => {
     const statusCode = response['status'];
     
 
-    // Follow Secondary Origin 200, 206, or 
+    // Follow Secondary Origin 200, 206, or 304
     if (serverHeader === 'UploadServer') {
         
         const myHeader = request.origin.custom.customHeaders['x-back-to-origin'][0].value;

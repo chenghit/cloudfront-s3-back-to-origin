@@ -44,7 +44,7 @@ class BackToOriginStack(Stack):
             self, "UriListQueue",
             queue_name=PhysicalName.GENERATE_IF_NEEDED,
             retention_period=Duration.days(1),
-            visibility_timeout=Duration.minutes(5),
+            visibility_timeout=Duration.minutes(15),
         )
         
         single_task_queue = sqs.Queue(
@@ -53,7 +53,7 @@ class BackToOriginStack(Stack):
             content_based_deduplication=True,
             fifo=True,
             retention_period=Duration.days(1),
-            visibility_timeout=Duration.minutes(5),
+            visibility_timeout=Duration.minutes(15),
         )
         
         mpu_task_queue = sqs.Queue(
@@ -62,7 +62,7 @@ class BackToOriginStack(Stack):
             content_based_deduplication=True,
             fifo=True,
             retention_period=Duration.days(1),
-            visibility_timeout=Duration.minutes(5),
+            visibility_timeout=Duration.minutes(15),
         )
         
         uri_list_table = ddb.Table(
@@ -102,8 +102,8 @@ class BackToOriginStack(Stack):
         lambda_main = _lambda.Function(
             self, 'Main',
             runtime=_lambda.Runtime.NODEJS_16_X,
-            memory_size=384,
-            timeout=Duration.minutes(5),
+            memory_size=256,
+            timeout=Duration.minutes(15),
             code=_lambda.Code.from_asset('lambda'),
             handler = 'main.handler',
             architecture = _lambda.Architecture.ARM_64,
@@ -123,8 +123,8 @@ class BackToOriginStack(Stack):
         lambda_single = _lambda.Function(
             self, 'Single',
             runtime = _lambda.Runtime.NODEJS_16_X,
-            memory_size = 384,
-            timeout = Duration.minutes(5),
+            memory_size = 256,
+            timeout = Duration.minutes(15),
             code = _lambda.Code.from_asset('lambda'),
             handler = 'single.handler',
             architecture = _lambda.Architecture.ARM_64,
@@ -139,8 +139,8 @@ class BackToOriginStack(Stack):
         lambda_mpu = _lambda.Function(
             self, 'MPU',
             runtime = _lambda.Runtime.NODEJS_16_X,
-            memory_size = 384,
-            timeout = Duration.minutes(5),
+            memory_size = 256,
+            timeout = Duration.minutes(15),
             code = _lambda.Code.from_asset('lambda'),
             handler = 'mpu.handler',
             architecture = _lambda.Architecture.ARM_64,
@@ -155,8 +155,8 @@ class BackToOriginStack(Stack):
         lambda_monitor = _lambda.Function(
             self, 'Monitor',
             runtime = _lambda.Runtime.NODEJS_16_X,
-            memory_size = 384,
-            timeout = Duration.minutes(5),
+            memory_size = 256,
+            timeout = Duration.minutes(15),
             code = _lambda.Code.from_asset('lambda'),
             handler = 'monitor.handler',
             architecture = _lambda.Architecture.ARM_64,
@@ -214,19 +214,19 @@ class BackToOriginStack(Stack):
         lambda_mpu.add_event_source(sqs_event_source_mpu_tasks)
 
         
-        five_minutes_rule = events.Rule(
-            self, 'five_minutes_rule',
-            schedule=events.Schedule.rate(Duration.minutes(5)),
+        fifteen_minutes_rule = events.Rule(
+            self, 'fifteen_minutes_rule',
+            schedule=events.Schedule.rate(Duration.minutes(15)),
         )
         
-        five_minutes_rule.add_target(event_targets.LambdaFunction(lambda_monitor))
+        fifteen_minutes_rule.add_target(event_targets.LambdaFunction(lambda_monitor))
 
 
         lambda_edge_origin_response = cf.experimental.EdgeFunction(
             self, 'OriginResponse',
             runtime = _lambda.Runtime.NODEJS_16_X,
-            memory_size = 384,
-            timeout = Duration.seconds(10),
+            memory_size = 128,
+            timeout = Duration.seconds(30),
             code = _lambda.Code.from_asset('lambda_edge'),
             handler = 'origin_response.handler',
         )

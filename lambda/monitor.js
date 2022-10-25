@@ -48,7 +48,7 @@ exports.handler = async (event) => {
     logger.info(incompletedTasks);
     
     // Scan mpu table to collect timeout tasks
-    let timeout = Date.now() - 300000;
+    let timeout = Date.now() - 900000;
     params = {
         TableName: mpuTable,
         FilterExpression: 'part_complete = :p AND start_time < :s',

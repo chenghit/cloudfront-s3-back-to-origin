@@ -116,7 +116,7 @@ $ cdk deploy --all --parameters BackToOrigin:gcsBucketName=YOUR_GCS_BUCKET_NAME
 ```
 
 To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
+them to your `requirements.txt` file and rerun the `pip install -r requirements.txt`
 command.
 
 ## Expected test results

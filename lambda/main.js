@@ -29,32 +29,25 @@ const mpuQueueUrl = process.env.MPU_QUEUE_URL;
 const singleResultTable = process.env.SINGLE_RESULT_TABLE;
 const mpuResultTable = process.env.MPU_RESULT_TABLE;
 
-const partSize5MB = 5 * 1024 * 1024;
-const partSize10MB = 10 * 1024 * 1024;
-const partSize16MB = 16 * 1024 * 1024;
-const partSize32MB = 32 * 1024 * 1024;
-const singleSize16MB = 16 * 1024 * 1024;
-const singleSize64MB = 64 * 1024 * 1024;
-const singleSize256MB = 256 * 1024 * 1024;
-const singleSize512MB = 512 * 1024 * 1024;
+const size5MB = 5 * 1024 * 1024;
+const size10MB = 10 * 1024 * 1024;
+const size16MB = 16 * 1024 * 1024;
+const size32MB = 32 * 1024 * 1024;
+const size64MB = 64 * 1024 * 1024;
+const size256MB = 256 * 1024 * 1024;
+const size512MB = 512 * 1024 * 1024;
 
 /*  Suggestion:
- *  - Scenario 1: 
- *      Mainly small files (images, js, css, html, etc); max file size <= 256MB:
- *        partSize = partSize5MB; maxSize = singleSize16MB;
- *  - Scenario 2: 
- *      Mainly medium files (zip, audio, short video, etc); max file size <= 512MB:
- *        partSize = partSize10MB; maxSize = singleSize64MB;
- *  - Scenario 3: 
- *      Mainly large files (apk, zip, video, etc); max file size <= 1GB:
- *        partSize = partSize16MB; maxSize = singleSize256MB;
- *  - Scenario 4: 
+ *  - Gaming or software distribution scenario: 
  *      Mainly very large files (apk, zip, video, etc); max file size may be up to 30GB:
  *        partSize = partSize32MB; maxSize = singleSize512MB;
+ *  - E-commerce, online video, or other application scenario: 
+ *      Mainly small files (images, ts, js, css, html, etc); max file size <= 256MB:
+ *        partSize = size5MB; maxSize = size32MB;
  */
 
-const maxSize = singleSize256MB;
-const partSize = partSize16MB;
+const maxSize = size512MB;
+const partSize = size32MB;
 const cloudfrontSizeLimit = 30 * 1024 * 1024 * 1024;
 
 exports.handler = async (event) => {

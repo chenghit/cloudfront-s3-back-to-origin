@@ -67,28 +67,33 @@ class BackToOriginStack(Stack):
         
         uri_list_table = ddb.Table(
             self, 'UriList',
+            removal_policy=RemovalPolicy.DESTROY,
             partition_key={'name': 'uri', 'type': ddb.AttributeType.STRING},
             sort_key={'name': 'content_length', 'type': ddb.AttributeType.NUMBER},
         )
         
         single_table = ddb.Table(
             self, 'S3Single',
+            removal_policy=RemovalPolicy.DESTROY,
             partition_key={'name': 'id', 'type': ddb.AttributeType.STRING},
         )
         
         single_result_table = ddb.Table(
             self, 'S3SingleResult',
+            removal_policy=RemovalPolicy.DESTROY,
             partition_key={'name': 'id', 'type': ddb.AttributeType.STRING},
         )
         
         mpu_table = ddb.Table(
             self, 'S3MPU',
+            removal_policy=RemovalPolicy.DESTROY,
             partition_key={'name': 'upload_id', 'type': ddb.AttributeType.STRING},
             sort_key={'name': 'part', 'type': ddb.AttributeType.NUMBER},
         )
         
         mpu_result_table = ddb.Table(
             self, 'S3MPUResult',
+            removal_policy=RemovalPolicy.DESTROY,
             partition_key={'name': 'upload_id', 'type': ddb.AttributeType.STRING},
         )
         
@@ -123,7 +128,7 @@ class BackToOriginStack(Stack):
         lambda_single = _lambda.Function(
             self, 'Single',
             runtime = _lambda.Runtime.NODEJS_16_X,
-            memory_size = 256,
+            memory_size = 384,
             timeout = Duration.minutes(15),
             code = _lambda.Code.from_asset('lambda'),
             handler = 'single.handler',
@@ -139,7 +144,7 @@ class BackToOriginStack(Stack):
         lambda_mpu = _lambda.Function(
             self, 'MPU',
             runtime = _lambda.Runtime.NODEJS_16_X,
-            memory_size = 256,
+            memory_size = 384,
             timeout = Duration.minutes(15),
             code = _lambda.Code.from_asset('lambda'),
             handler = 'mpu.handler',
